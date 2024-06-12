@@ -1,6 +1,8 @@
 import streamlit as st
 from dotenv import load_dotenv
 import os
+import time
+from langchain_cohere import ChatCohere
 from langchain_community.llms import Cohere
 
 # Load environment variables from .env file
@@ -30,6 +32,11 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
+def stream_data(response):
+    for word in response.split(" "):
+        yield word + " "
+        time.sleep(0.05)
+
 def main():
 
     #Customize GUI: create info sidebar
@@ -53,7 +60,8 @@ def main():
         with st.chat_message("assistant"):
             #Supply prompt to llm
             response = llmModel(prompt)
-            st.markdown(response)
+            #st.markdown(response)
+            st.write_stream(stream_data(response=response))
         # Add assistant response to chat history
         st.session_state.messages.append({"role": "assistant", "content": response})
 
